@@ -1,4 +1,4 @@
-name: app
+name: prototype
 
 services:
   postgres:
@@ -35,6 +35,23 @@ services:
       postgres:
         condition: service_healthy
 
+  backend:
+    build: ./backend
+    container_name: app-backend
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:
