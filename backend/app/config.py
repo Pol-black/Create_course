@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     db_port: int | None = None
     postgres_port: int = 5432
 
+    log_level: str = "INFO"
+    
     @property
     def database_url(self) -> str:
         port = self.db_port or self.postgres_port

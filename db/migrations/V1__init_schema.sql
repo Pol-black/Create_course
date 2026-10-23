@@ -7,7 +7,7 @@ CREATE TYPE log_level_enum       AS ENUM ('INFO', 'WARN', 'ERROR');
 
 CREATE TABLE document (
     id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    file_name      TEXT                 NOT NULL,   -- исходное имя файла
+    file_name      TEXT                 NOT NULL,   
     file_type      file_type_enum,
     file_size      BIGINT               CHECK (file_size >= 0),
     file_path      TEXT,

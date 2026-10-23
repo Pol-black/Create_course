@@ -11,33 +11,34 @@ Backend на FastAPI + PostgreSQL, миграции через Flyway, запу�
 
 ```bash
 git clone <url> && cd Prototype
-cp .env.example .env        # при необходимости поменять пароль и порты
+cp .env.example .env        # при необходимости поменять пароль, порты, LOG_LEVEL
 docker compose up -d --build
-```
-
-Порядок старта: `postgres` → `flyway` (применяет миграции и завершается) → `backend`.
-
-Проверить статус:
-
-```bash
 docker compose ps
 ```
 
 `postgres` и `backend` должны быть `healthy`, `flyway` — `exited (0)`.
 
+После изменений в `backend/` пересобрать образ:
+
+```bash
+docker compose up -d --build backend
+```
+
 ## Проверка
 
 | Адрес | Назначение |
 |---|---|
-| http://localhost:8000/health | Состояние сервиса и БД (`{"status":"ok","db":"ok"}`) |
+| http://localhost:8000/api/health | Состояние сервиса и БД |
 | http://localhost:8000/docs | Swagger UI |
-| http://localhost:8000/redoc | ReDoc |
 
-Таблицы в БД:
+Скрипты проверки моделей и журнала обработки:
 
 ```bash
-docker exec -it app-postgres psql -U app -d app -c "\dt"
+docker compose exec backend python -m app.scripts.check_models
+docker compose exec backend python -m app.scripts.check_logging
 ```
+
+Логи: `docker compose logs -f backend`
 
 ## Локальная разработка backend
 
@@ -45,7 +46,7 @@ docker exec -it app-postgres psql -U app -d app -c "\dt"
 docker compose up -d postgres flyway
 cd backend
 python -m venv .venv
-source .venv/bin/activate     
+source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```

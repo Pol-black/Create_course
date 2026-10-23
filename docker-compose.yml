@@ -45,6 +45,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DB_HOST: postgres
       DB_PORT: 5432
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     depends_on:

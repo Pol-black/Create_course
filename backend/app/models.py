@@ -140,7 +140,7 @@ class Chunk(Base):
     document_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("document.id", ondelete="CASCADE"), nullable=False
     )
-    position: Mapped[int] = mapped_column(Integer, nullable=False)  # порядковый номер, с 0
+    position: Mapped[int] = mapped_column(Integer, nullable=False)  
     heading: Mapped[str | None] = mapped_column(Text)
     page_from: Mapped[int | None] = mapped_column(Integer)
     page_to: Mapped[int | None] = mapped_column(Integer)
@@ -159,7 +159,7 @@ class Course(Base):
     )
     title: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    goals: Mapped[list[Any]] = mapped_column(JSONB, nullable=False)  # JSON-массив целей
+    goals: Mapped[list[Any]] = mapped_column(JSONB, nullable=False)  
     status: Mapped[CourseStatus] = mapped_column(course_status_enum, nullable=False)
     error_message: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = created_at_column()
@@ -215,10 +215,10 @@ class SectionVersion(Base):
     section_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("section.id", ondelete="CASCADE"), nullable=False
     )
-    version_no: Mapped[int] = mapped_column(Integer, nullable=False)  # 1, 2, 3...
+    version_no: Mapped[int] = mapped_column(Integer, nullable=False)  
     content: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     author: Mapped[Author] = mapped_column(author_enum, nullable=False)
-    model: Mapped[str | None] = mapped_column(Text)  # какая LLM сгенерировала
+    model: Mapped[str | None] = mapped_column(Text) 
     prompt_name: Mapped[str | None] = mapped_column(Text)
     user_hint: Mapped[str | None] = mapped_column(Text)
     check_result: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
