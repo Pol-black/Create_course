@@ -5,7 +5,7 @@ Backend на FastAPI + PostgreSQL, миграции через Flyway, запу�
 ## Требования
 
 - Docker и Docker Compose
-- Python 3.12 — только для локального запуска backend без Docker
+- Python 3.12 - только для локального запуска backend без Docker
 
 ## Запуск
 
@@ -45,7 +45,7 @@ docker exec -it app-postgres psql -U app -d app -c "\dt"
 docker compose up -d postgres flyway
 cd backend
 python -m venv .venv
-source .venv/bin/activate     # Windows: .venv\Scripts\activate
+source .venv/bin/activate     
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
