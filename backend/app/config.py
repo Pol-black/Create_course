@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import URL
 
 
 class Settings(BaseSettings):
@@ -14,11 +15,14 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     
     @property
-    def database_url(self) -> str:
-        port = self.db_port or self.postgres_port
-        return (
-            f"postgresql+psycopg://{self.postgres_user}:{self.postgres_password}"
-            f"@{self.db_host}:{port}/{self.postgres_db}"
+    def database_url(self) -> URL:
+        return URL.create(
+            drivername="postgresql+psycopg",
+            username=self.postgres_user,
+            password=self.postgres_password,
+            host=self.db_host,
+            port=self.db_port or self.postgres_port,
+            database=self.postgres_db,
         )
 
 

@@ -22,7 +22,7 @@ def main() -> None:
         )
         session.add(doc)
         session.commit()
-        doc_id = doc.id
+        doc_id = doc.id # как еще можно получить
 
         # Три записи: обычная, успешный этап и этап с ошибкой
         write_log(doc_id, "upload", "Файл загружен")

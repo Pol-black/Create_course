@@ -8,7 +8,7 @@ from app.errors import error_response
 
 logger = logging.getLogger("app.request")
 
-QUIET_PATHS = {"/api/health"}
+QUIET_PATHS = {"/api/health", "/api/health/live", "/api/health/ready"}
 
 
 def register_request_logging(app: FastAPI) -> None:
