@@ -56,7 +56,6 @@ services:
       LLM_TIMEOUT_S: ${LLM_TIMEOUT_S:-300}
       LLM_JSON_ATTEMPTS: ${LLM_JSON_ATTEMPTS:-2}
       LLM_JSON_MODE: ${LLM_JSON_MODE:-false}
-    
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     depends_on:
@@ -65,5 +64,23 @@ services:
       flyway:
         condition: service_completed_successfully
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: app-frontend
+    restart: unless-stopped
+    environment:
+      API_TARGET: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
+  frontend_node_modules:

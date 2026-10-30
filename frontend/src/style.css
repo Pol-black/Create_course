@@ -1,0 +1,94 @@
+:root {
+  --text: #1f2328;
+  --muted: #656d76;
+  --line: #d8dee4;
+  --bg: #f6f8fa;
+  --accent: #2563eb;
+  --ok: #1a7f37;
+  --err: #b42318;
+  font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--text);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+.page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+h1 { font-size: 24px; margin: 0 0 4px; }
+h2 { font-size: 18px; margin: 0 0 12px; }
+
+.subtitle { color: var(--muted); margin: 0 0 24px; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+/* Зона, куда можно перетащить файл */
+.dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  padding: 36px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.dropzone:hover { border-color: var(--accent); }
+.dropzone.over { border-color: var(--accent); background: #eff6ff; }
+.dropzone.busy { opacity: .6; cursor: progress; }
+
+.hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled { opacity: .5; cursor: default; }
+
+.alert {
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+.alert.error { background: #fff1f0; color: var(--err); border: 1px solid #ffc9c4; }
+.alert.ok { background: #eaf7ee; color: var(--ok); border: 1px solid #b7e2c3; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; }
+
+.status { font-size: 12px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.status.PROCESSED { background: #eaf7ee; color: var(--ok); }
+.status.FAILED { background: #fff1f0; color: var(--err); }
+.status.UPLOADED, .status.PROCESSING { background: #eef2ff; color: var(--accent); }
+
+pre.text-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 13px;
+  margin: 0;
+}
