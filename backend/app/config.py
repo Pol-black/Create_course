@@ -4,8 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
 
 
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=ROOT_DIR / ".env", extra="ignore")
 
     postgres_db: str
     postgres_user: str
@@ -20,15 +23,20 @@ class Settings(BaseSettings):
     max_upload_mb: int = 25
     min_text_chars: int = 50
 
+    chunk_target_words: int = 600
+    chunk_max_words: int = 1000
+    chunk_min_words: int = 120
+
     llm_base_url: str = "https://openrouter.ai/api/v1"
     llm_api_key: str = ""
     llm_model: str = "thinkingmachines/inkling:free"
+    llm_fallback_model: str = ""
 
-    llm_temperature: float = 0.3 # 0 — ответы почти одинаковые, 1 — более «творческие». Для курса 0.2–0.4.
-    llm_max_tokens: int = 4096 # Максимальная длина ответа модели в токенах 
-    llm_timeout_s: float = 300  # Сколько секунд ждать ответа
-    llm_json_attempts: int = 2 # Сколько раз просить модель, если она вернула неправильный JSON
-    llm_json_mode: bool = True # Просить у API режим «только JSON» 
+    llm_temperature: float = 0.3 
+    llm_max_tokens: int = 8192 
+    llm_timeout_s: float = 300  
+    llm_json_attempts: int = 2
+    llm_json_mode: bool = False  
 
     @property
     def max_upload_bytes(self) -> int:

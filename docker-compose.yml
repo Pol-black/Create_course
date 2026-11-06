@@ -51,13 +51,16 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-https://openrouter.ai/api/v1}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-thinkingmachines/inkling:free}
+      LLM_FALLBACK_MODEL: ${LLM_FALLBACK_MODEL:-}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.3}
-      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-4096}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-8192}
       LLM_TIMEOUT_S: ${LLM_TIMEOUT_S:-300}
       LLM_JSON_ATTEMPTS: ${LLM_JSON_ATTEMPTS:-2}
       LLM_JSON_MODE: ${LLM_JSON_MODE:-false}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - uploads:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,4 +86,5 @@ services:
 
 volumes:
   pgdata:
+  uploads:
   frontend_node_modules:

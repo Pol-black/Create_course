@@ -17,6 +17,18 @@ CONSOLE_LEVELS = {
 }
 
 
+class Stage:
+    """Названия этапов для processing_log (чтобы не плодить опечатки)."""
+
+    UPLOAD = "upload"
+    EXTRACT = "extract"
+    CLEAN = "clean"
+    CHUNK = "chunk"
+    OUTLINE = "outline"
+    SECTION = "section"
+    CHECK = "check"
+
+
 def write_log(
     document_id: int,
     stage: str,

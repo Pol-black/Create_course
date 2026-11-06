@@ -24,39 +24,48 @@ def main() -> None:
         session.commit()
         doc_id = doc.id # как еще можно получить
 
-        # Три записи: обычная, успешный этап и этап с ошибкой
-        write_log(doc_id, "upload", "Файл загружен")
-
-        with log_stage(doc_id, "extract", "Извлечение текста"):
-            sum(range(1000000))  # имитация работы
-
         try:
-            with log_stage(doc_id, "chunk", "Деление на фрагменты"):
-                raise ValueError("в тексте нет заголовков")
-        except ValueError:
-            pass 
+            # Три записи: обычная, успешный этап и этап с ошибкой
+            write_log(doc_id, "upload", "Файл загружен")
 
-        # Чтение журнала из базы
-        logs = session.scalars(
-            select(ProcessingLog)
-            .where(ProcessingLog.document_id == doc_id)
-            .order_by(ProcessingLog.id)
-        ).all()
-        print("\nЖурнал документа из БД:")
-        for log in logs:
-            print(f"  {log.level.value:5} {log.stage:8} {log.message} ({log.duration_ms} ms)")
+            with log_stage(doc_id, "extract", "Извлечение текста"):
+                sum(range(1000000))  # имитация работы
 
-        assert [log.level for log in logs] == [LogLevel.INFO, LogLevel.INFO, LogLevel.ERROR]
-        assert logs[1].duration_ms is not None, "У этапа нет времени выполнения"
+            try:
+                with log_stage(doc_id, "chunk", "Деление на фрагменты"):
+                    raise ValueError("в тексте нет заголовков")
+            except ValueError:
+                pass 
 
-        # Удаление документа
-        session.delete(doc)
-        session.commit()
-        left = session.scalars(
-            select(ProcessingLog).where(ProcessingLog.document_id == doc_id)
-        ).all()
-        assert not left, "Журнал не удалился каскадом"
-        print("Документ и журнал удалены. Проверка пройдена.")
+            # Чтение журнала из базы
+            logs = session.scalars(
+                select(ProcessingLog)
+                .where(ProcessingLog.document_id == doc_id)
+                .order_by(ProcessingLog.id)
+            ).all()
+            print("\nЖурнал документа из БД:")
+            for log in logs:
+                print(f"  {log.level.value:5} {log.stage:8} {log.message} ({log.duration_ms} ms)")
+
+            assert [log.level for log in logs] == [LogLevel.INFO, LogLevel.INFO, LogLevel.ERROR]
+            assert logs[1].duration_ms is not None, "У этапа нет времени выполнения"
+
+            # Удаление документа
+            session.delete(doc)
+            session.commit()
+            left = session.scalars(
+                select(ProcessingLog).where(ProcessingLog.document_id == doc_id)
+            ).all()
+            assert not left, "Журнал не удалился каскадом"
+            print("Документ и журнал удалены. Проверка пройдена.")
+
+        finally:
+            # Даже если проверка упала, тестовый документ не должен остаться в базе
+            session.rollback()
+            leftover = session.get(Document, doc_id)
+            if leftover is not None:
+                session.delete(leftover)
+                session.commit()
 
 
 if __name__ == "__main__":

@@ -43,9 +43,17 @@ async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
     return error_response(request, exc.status_code, exc.code, exc.message)
 
 
+def _standard_phrase(status_code: int) -> str | None:
+    """Стандартный английский текст кода ('Not Found') или None для нестандартного кода."""
+    try:
+        return HTTPStatus(status_code).phrase
+    except ValueError:
+        return None
+
+
 async def http_error_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
     code, message = HTTP_ERRORS.get(exc.status_code, ("http_error", "Ошибка запроса"))
-    if isinstance(exc.detail, str) and exc.detail != HTTPStatus(exc.status_code).phrase:
+    if isinstance(exc.detail, str) and exc.detail != _standard_phrase(exc.status_code):
         message = exc.detail
     return error_response(request, exc.status_code, code, message)
 

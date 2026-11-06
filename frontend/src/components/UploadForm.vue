@@ -60,8 +60,8 @@ function onDrop(event) {
       @drop.prevent="onDrop"
     >
       <template v-if="busy">
-        <strong>Обрабатываем файл…</strong>
-        <p class="hint">Читаем документ и достаём из него текст</p>
+        <strong>Загружаем файл…</strong>
+        <p class="hint">Файл только сохраняется, обработка начнётся по кнопке</p>
       </template>
       <template v-else>
         <strong>Перетащите файл сюда или нажмите, чтобы выбрать</strong>
