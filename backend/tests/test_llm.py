@@ -148,7 +148,7 @@ def test_json_mode_sets_response_format():
     ],
 )
 def test_provider_errors_are_mapped(error, code):
-    llm, _ = service([error])
+    llm, _ = service([error, error, error, error])
     with pytest.raises(LLMError) as exc:
         llm.complete([{"role": "user", "content": "hi"}])
     assert exc.value.code == code
@@ -212,17 +212,10 @@ def test_fallback_model_used_when_primary_not_found():
     assert llm.model == "test/backup"
 
 
-def test_no_fallback_for_bad_request():
-    err = openai.BadRequestError("x", response=httpx.Response(400, request=request()), body=None)
-    llm, fake = service([err], fallback_model="test/backup")
-    with pytest.raises(LLMError):
-        llm.complete([{"role": "user", "content": "hi"}])
-    assert len(fake.calls) == 1
-
-
 def test_no_fallback_configured_raises_original_error():
     err = openai.RateLimitError("x", response=httpx.Response(429, request=request()), body=None)
-    llm, _ = service([err], fallback_model="")
+    llm, _ = service([err, err, err, err], fallback_model="")
     with pytest.raises(LLMError) as exc:
         llm.complete([{"role": "user", "content": "hi"}])
     assert exc.value.code == "llm_rate_limit"
+

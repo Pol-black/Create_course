@@ -11,8 +11,6 @@ const when = (iso) => new Date(iso).toLocaleString('ru-RU')
 
 function describe(v) {
   if (v.prompt_name && v.prompt_name.startsWith('restore:')) return `возврат к версии ${v.prompt_name.slice(9)}`
-  if (v.model === 'example') return 'пример курса'
-  if (v.model === 'draft') return 'черновик по правилам'
   if (v.author === 'AI') return `модель ${v.model || ''}`.trim()
   return 'правка вручную'
 }

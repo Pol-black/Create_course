@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { createExampleCourse, deleteCourse } from '../api.js'
+import { deleteCourse } from '../api.js'
 
 defineProps({ courses: { type: Array, required: true } })
 const emit = defineEmits(['open', 'changed'])
@@ -20,11 +20,6 @@ async function run(action) {
   }
 }
 
-async function createExample() {
-  const course = await run(createExampleCourse)
-  emit('changed')
-  if (course) emit('open', course.id)
-}
 
 async function remove(course) {
   if (!confirm(`Удалить курс «${course.title}» со всеми разделами и версиями?`)) return
@@ -39,9 +34,6 @@ const when = (iso) => new Date(iso).toLocaleString('ru-RU')
   <div class="card">
     <div class="row">
       <h2>Курсы</h2>
-      <button class="primary" :disabled="busy" @click="createExample">
-        {{ busy ? 'Создаём…' : 'Создать пример курса' }}
-      </button>
     </div>
     <p class="hint">
       Пример — готовый курс по документу MPI.pdf: на нём можно проверить просмотр, редактирование, порядок разделов и версии.

@@ -90,16 +90,12 @@ docker compose exec backend python -m app.scripts.check_upload
 - скачать весь курс одним файлом Markdown;
 - «Сгенерировать заново» один раздел через LLM (нужен `LLM_API_KEY`), остальной курс не меняется.
 
-Как получить курс без LLM:
-
-- кнопка **«Создать пример курса»** на вкладке «Курсы»: готовый курс по `MPI.pdf` (файлы `backend/app/courses/example/`);
+Как получить курс:
 - кнопка **«Создать курс»** у обработанного документа: черновик по правилам (`app/courses/draft.py`), по одному разделу на фрагмент.
 
 | Метод | Адрес | Действие |
 | --- | --- | --- |
 | GET | `/api/courses`, `/api/courses/{id}` | список курсов, курс целиком |
-| POST | `/api/courses/example` | создать пример курса |
-| POST | `/api/documents/{id}/course/draft` | черновик курса из фрагментов |
 | PATCH / DELETE | `/api/courses/{id}` | править описание / удалить курс |
 | PUT | `/api/courses/{id}/order` | новый порядок разделов |
 | POST | `/api/courses/{id}/sections` | добавить раздел |

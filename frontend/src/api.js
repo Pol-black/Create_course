@@ -64,9 +64,6 @@ const json = (method, body) => ({
 
 export const listCourses = async () => handle(await fetch(`${BASE}/courses`))
 export const getCourse = async (id) => handle(await fetch(`${BASE}/courses/${id}`))
-export const createExampleCourse = async () => handle(await fetch(`${BASE}/courses/example`, { method: 'POST' }))
-export const createDraftCourse = async (documentId, replace = false) =>
-  handle(await fetch(`${BASE}/documents/${documentId}/course/draft?replace=${replace}`, { method: 'POST' }))
 export const updateCourse = async (id, data) => handle(await fetch(`${BASE}/courses/${id}`, json('PATCH', data)))
 export const deleteCourse = async (id) => handle(await fetch(`${BASE}/courses/${id}`, { method: 'DELETE' }))
 export const reorderSections = async (id, sectionIds) =>

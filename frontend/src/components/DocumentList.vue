@@ -1,5 +1,5 @@
 <script setup>
-import { createDraftCourse, deleteDocument, generateCourse, processDocument } from '../api.js'
+import { deleteDocument, generateCourse, processDocument } from '../api.js'
 
 const props = defineProps({
   documents: { type: Array, required: true },
@@ -105,7 +105,6 @@ function remove(doc) {
                 title="План и разделы пишет языковая модель"
                 @click="makeCourse(doc, generateCourse)"
               >{{ courseOf(doc) ? 'Создать курс заново (LLM)' : 'Создать курс (LLM)' }}</button>
-              <button title="Курс по правилам, без языковой модели" @click="makeCourse(doc, createDraftCourse)">Черновик без LLM</button>
             </template>
             <button @click="emit('show', doc, 'text')" v-if="doc.text_length">Текст</button>
             <button @click="emit('show', doc, 'chunks')" v-if="doc.chunks_count">Фрагменты</button>

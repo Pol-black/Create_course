@@ -6,8 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.courses import content as C
 from app.courses import generation, service
-from app.courses.example import create_example_course
-from app.courses.from_document import create_draft_course
 from app.db import get_db
 
 router = APIRouter(tags=["courses"])
@@ -76,24 +74,6 @@ def export_course(course_id: int, session: Session = Depends(get_db)) -> Respons
         media_type="text/markdown; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
     )
-
-
-# создание курса без LLM
-
-@router.post("/courses/example", status_code=201)
-def create_example(session: Session = Depends(get_db)) -> dict:
-    """Готовый пример курса (MPI) вместе с документом и фрагментами."""
-    return service.course_view(session, create_example_course(session))
-
-
-@router.post("/documents/{document_id}/course/draft", status_code=201)
-def create_draft(
-    document_id: int,
-    replace: bool = Query(False, description="Заменить уже созданный курс"),
-    session: Session = Depends(get_db),
-) -> dict:
-    """Черновик курса из фрагментов документа по правилам, без языковой модели."""
-    return service.course_view(session, create_draft_course(session, document_id, replace))
 
 
 # создание курса через LLM

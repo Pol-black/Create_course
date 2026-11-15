@@ -1,14 +1,9 @@
 """Содержимое раздела: правки, порядок, экспорт, пример курса. Без базы данных."""
 
-import json
-from pathlib import Path
-
 import pytest
 from pydantic import ValidationError
 
 from app.courses import content as C
-
-EXAMPLE = Path(__file__).parent.parent / "app" / "courses" / "example"
 
 CURRENT = {
     "title": "Тема", "intro": "Кратко", "content_md": "Текст", "terms": [], "summary": ["вывод"],
@@ -77,18 +72,3 @@ def test_export_markdown_contains_everything():
     for part in ("# Курс", "- цель", "## 1. Раздел", "**Т** — О", "- вывод", "- [x] а", "- [ ] б", "нет данных"):
         assert part in md
 
-
-def test_example_course_is_valid_and_complete():
-    data = json.loads((EXAMPLE / "course.json").read_text(encoding="utf-8"))
-    chunks = json.loads((EXAMPLE / "chunks.json").read_text(encoding="utf-8"))
-    positions = {c["position"] for c in chunks}
-    assert len(data["sections"]) >= 8
-    for section in data["sections"]:
-        content = C.SectionContentIn.model_validate(section["content"])
-        assert len(content.content_md.split()) > 40  # есть содержательный текст, а не только заголовок
-        assert content.summary and content.questions
-        assert section["chunk_positions"] and set(section["chunk_positions"]) <= positions
-
-
-def test_example_pdf_is_shipped():
-    assert (EXAMPLE / "MPI.pdf").stat().st_size > 1000

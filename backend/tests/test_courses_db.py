@@ -1,5 +1,5 @@
 """
-Курсы через API на настоящей базе: создание примера, правка, версии, порядок, удаление, экспорт.
+Курсы через API на настоящей базе: создание, правка, версии, порядок, удаление, экспорт.
 Тесты пропускаются, если база недоступна (запускайте в Docker: docker compose exec backend pytest).
 """
 
@@ -7,7 +7,8 @@ import pytest
 from sqlalchemy import text
 
 from app.db import SessionLocal
-from app.models import Document
+from app.models import Document, Course, SectionVersion
+from app.courses import service
 
 
 def _db_ready() -> bool:
@@ -23,25 +24,65 @@ pytestmark = pytest.mark.skipif(not _db_ready(), reason="нет доступно
 
 
 @pytest.fixture
-def course(client, tmp_path, monkeypatch):
-    from app.config import settings
+def course(client):
+    """
+    Создаем тестовый курс напрямую в БД.
+    Это дает нам чистые данные для тестирования REST API (правки, версии, удаление).
+    """
+    with SessionLocal() as s:
+        # 1. Создаем исходный документ
+        doc = Document(
+            file_name="test_doc.txt", 
+            file_type="TXT", 
+            file_size=1024, 
+            file_path="none", 
+            status="UPLOADED",
+            check_enabled=False 
+        )
+        s.add(doc)
+        s.commit()
 
-    monkeypatch.setattr(settings, "upload_dir", tmp_path)
-    response = client.post("/api/courses/example")
-    assert response.status_code == 201, response.text
+        # 2. Создаем курс
+        c = Course(
+            document_id=doc.id, 
+            title="Тестовый курс", 
+            status="READY", 
+            goals=[]  
+        )
+        s.add(c)
+        s.commit()
+
+        # 3. Добавляем 3 раздела (нужно для тестов перетаскивания и версий)
+        s1 = service.add_section(s, c.id, "Раздел 1")
+        s1.status = "READY"
+        s2 = service.add_section(s, c.id, "Раздел 2")
+        s2.status = "READY"
+        s3 = service.add_section(s, c.id, "Раздел 3")
+        s3.status = "READY"
+        s.commit()
+
+        # 4. Добавляем текст в самую первую версию первого раздела, не увеличивая номер версии
+        v1 = s.query(SectionVersion).filter(SectionVersion.id == s1.current_version_id).first()
+        if v1:
+            content = v1.content.copy()
+            content["content_md"] = "Стартовый текст раздела"
+            v1.content = content
+            s.commit()
+
+        course_id = c.id
+
+    # Запрашиваем созданный курс через API
+    response = client.get(f"/api/courses/{course_id}")
+    assert response.status_code == 200, "Ошибка при запросе созданного в фикстуре курса"
     data = response.json()
+    
     yield data
-    with SessionLocal() as s:  # курс и всё его содержимое удаляются каскадом
+    
+    # Очистка после теста 
+    with SessionLocal() as s:
         for doc in s.query(Document).filter(Document.id == data["document"]["id"]):
             s.delete(doc)
         s.commit()
-
-
-def test_example_is_created_once(client, course):
-    again = client.post("/api/courses/example")
-    assert again.json()["id"] == course["id"]
-    assert len(course["sections"]) >= 8
-    assert [s["position"] for s in course["sections"]] == list(range(len(course["sections"])))
 
 
 def test_course_survives_reload(client, course):
@@ -96,7 +137,6 @@ def test_reorder_sections(client, course):
     assert result.status_code == 200, result.text
     assert [s["id"] for s in result.json()["sections"]] == new
     assert [s["position"] for s in result.json()["sections"]] == list(range(len(new)))
-    # порядок сохранён в базе
     assert [s["id"] for s in client.get(f"/api/courses/{course['id']}").json()["sections"]] == new
 
 
