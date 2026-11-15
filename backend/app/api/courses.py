@@ -1,6 +1,6 @@
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -94,6 +94,22 @@ def create_draft(
 ) -> dict:
     """Черновик курса из фрагментов документа по правилам, без языковой модели."""
     return service.course_view(session, create_draft_course(session, document_id, replace))
+
+
+# создание курса через LLM
+
+@router.post("/documents/{document_id}/course/generate", status_code=202)
+def generate_course(
+    document_id: int,
+    background: BackgroundTasks,
+    replace: bool = Query(False, description="Заменить уже созданный курс"),
+    session: Session = Depends(get_db),
+) -> dict:
+    """Создать курс через LLM: план и разделы. Работает в фоне, прогресс виден в статусах курса и разделов."""
+    course = generation.start_course_generation(session, document_id, replace)
+    background.add_task(generation.run_course_generation, course.id)
+    return service.course_view(session, course)
+
 
 
 # разделы

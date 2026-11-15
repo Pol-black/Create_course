@@ -1,5 +1,5 @@
 <script setup>
-import { createDraftCourse, deleteDocument, processDocument } from '../api.js'
+import { createDraftCourse, deleteDocument, generateCourse, processDocument } from '../api.js'
 
 const props = defineProps({
   documents: { type: Array, required: true },
@@ -43,11 +43,11 @@ function process(doc) {
 
 const courseOf = (doc) => props.courses.find((c) => c.document_id === doc.id)
 
-async function makeCourse(doc) {
+async function makeCourse(doc, create) {
   const existing = courseOf(doc)
-  if (existing && !confirm('Для этого документа курс уже есть. Заменить его новым черновиком? Правки и версии прежнего курса будут удалены.')) return
+  if (existing && !confirm('Для этого документа курс уже есть. Заменить его новым? Правки и версии прежнего курса будут удалены.')) return
   try {
-    const course = await createDraftCourse(doc.id, Boolean(existing))
+    const course = await create(doc.id, Boolean(existing))
     emit('changed')
     emit('open-course', course.id)
   } catch (e) {
@@ -98,9 +98,15 @@ function remove(doc) {
               @click="process(doc)"
             >{{ doc.status === 'PROCESSING' ? 'Обработка…' : processLabel(doc) }}</button>
             <button v-if="courseOf(doc)" @click="emit('open-course', courseOf(doc).id)">Открыть курс</button>
-            <button v-if="doc.status === 'PROCESSED' && doc.chunks_count" @click="makeCourse(doc)">
-              {{ courseOf(doc) ? 'Пересоздать курс' : 'Создать курс' }}
-            </button>
+            <template v-if="doc.status === 'PROCESSED' && doc.chunks_count">
+              <button
+                class="primary"
+                :disabled="courseOf(doc)?.status === 'GENERATING'"
+                title="План и разделы пишет языковая модель"
+                @click="makeCourse(doc, generateCourse)"
+              >{{ courseOf(doc) ? 'Создать курс заново (LLM)' : 'Создать курс (LLM)' }}</button>
+              <button title="Курс по правилам, без языковой модели" @click="makeCourse(doc, createDraftCourse)">Черновик без LLM</button>
+            </template>
             <button @click="emit('show', doc, 'text')" v-if="doc.text_length">Текст</button>
             <button @click="emit('show', doc, 'chunks')" v-if="doc.chunks_count">Фрагменты</button>
             <button @click="emit('show', doc, 'log')">Журнал</button>

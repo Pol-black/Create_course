@@ -18,9 +18,10 @@ setup_logging(settings.log_level)
 async def lifespan(_app: FastAPI):
     # Документы, которые обрабатывались в момент перезапуска, больше не обрабатываются
     try:
+        from app.courses.generation import recover_interrupted_courses
         from app.processing import recover_interrupted
 
-        stuck = recover_interrupted()
+        stuck = recover_interrupted() + recover_interrupted_courses()
         if stuck:
             logging.getLogger("app").warning("Прерванных обработок: %d, помечены ошибкой", stuck)
     except Exception:

@@ -165,3 +165,8 @@ dd { margin: 0 0 4px 16px; }
 .version.current { border-color: var(--accent); }
 .version-body { margin-top: 10px; max-height: 360px; overflow: auto; border-top: 1px solid var(--line); padding-top: 8px; }
 .regen textarea { width: 100%; padding: 8px; font: inherit; border: 1px solid var(--line); border-radius: 6px; margin: 4px 0 12px; display: block; }
+
+.mark { font-size: 12px; margin-right: 4px; }
+.mark.GENERATING { color: var(--accent); }
+.mark.FAILED { color: var(--err); }
+.mark.HAS_ISSUES { color: #b45309; }

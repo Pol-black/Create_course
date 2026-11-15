@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   addSection, deleteSection, exportUrl, getCourse, getVersions, regenerateSection,
   reorderSections, restoreVersion, updateCourse, updateSection,
@@ -47,7 +47,30 @@ async function load(selectId = selectedId.value) {
   selectedId.value = exists ? selectId : data.sections[0]?.id ?? null
 }
 
-onMounted(load)
+// Пока курс создаётся моделью, обновляем страницу: разделы появляются и заполняются по очереди
+let timer = null
+async function poll() {
+  try {
+    const data = await getCourse(props.courseId)
+    const wasGenerating = course.value?.status === 'GENERATING'
+    course.value = data
+    if (!data.sections.some((s) => s.id === selectedId.value)) selectedId.value = data.sections[0]?.id ?? null
+    if (wasGenerating && data.status !== 'GENERATING') emit('changed')
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
+onMounted(() => {
+  load()
+  timer = setInterval(() => {
+    if (course.value?.status === 'GENERATING' && !busy.value) poll()
+  }, 3000)
+})
+onBeforeUnmount(() => clearInterval(timer))
+
+const generating = computed(() => course.value?.status === 'GENERATING')
+const doneCount = computed(() => course.value?.sections.filter((s) => s.status !== 'GENERATING').length ?? 0)
 watch(() => props.courseId, () => load(null))
 watch(selectedId, () => {
   mode.value = 'read'
@@ -147,7 +170,8 @@ async function saveMeta() {
   emit('changed')
 }
 
-const STATUS = { READY: 'готов', HAS_ISSUES: 'есть замечания', GENERATING: 'генерируется', FAILED: 'ошибка', PENDING: 'ожидает' }
+const STATUS = { READY: 'готов', HAS_ISSUES: 'есть замечания', GENERATING: 'пишется…', FAILED: 'не удалось' }
+const MARK = { GENERATING: '…', FAILED: '✕', HAS_ISSUES: '⚠' }
 const letter = (i) => String.fromCharCode(1040 + i) // А, Б, В…
 </script>
 
@@ -188,6 +212,11 @@ const letter = (i) => String.fromCharCode(1040 + i) // А, Б, В…
       </form>
     </div>
 
+    <div v-if="generating" class="alert ok">
+      Курс создаёт языковая модель: готово разделов {{ doneCount }} из {{ course.sections.length || '…' }}.
+      Страница обновляется сама, можно подождать или вернуться позже.
+    </div>
+    <div v-else-if="course.error_message" class="alert error">{{ course.error_message }}</div>
     <div v-if="notice" class="alert ok">{{ notice }}</div>
     <div v-if="error && mode !== 'edit'" class="alert error">{{ error }}</div>
 
@@ -197,6 +226,7 @@ const letter = (i) => String.fromCharCode(1040 + i) // А, Б, В…
         <ol>
           <li v-for="(s, i) in course.sections" :key="s.id" :class="{ active: s.id === selectedId }">
             <a href="#" @click.prevent="select(s.id)">{{ s.title }}</a>
+            <span v-if="MARK[s.status]" class="mark" :class="s.status" :title="STATUS[s.status]">{{ MARK[s.status] }}</span>
             <span class="move">
               <button :disabled="busy || i === 0" title="Выше" @click="move(i, -1)">↑</button>
               <button :disabled="busy || i === course.sections.length - 1" title="Ниже" @click="move(i, 1)">↓</button>
@@ -211,15 +241,16 @@ const letter = (i) => String.fromCharCode(1040 + i) // А, Б, В…
           <h2>{{ section.title }}</h2>
           <span class="hint">
             версия {{ section.version_no }} из {{ section.versions_count }} · {{ STATUS[section.status] }}
+            <template v-if="section.author === 'AI' && section.model"> · модель {{ section.model }}</template>
           </span>
         </div>
 
         <div class="toolbar">
-          <button :class="{ primary: mode === 'edit' }" :disabled="busy" @click="mode = 'edit'">Редактировать</button>
+          <button :class="{ primary: mode === 'edit' }" :disabled="busy || generating" @click="mode = 'edit'">Редактировать</button>
           <button :disabled="busy" @click="openVersions">История версий</button>
-          <button :disabled="busy" @click="mode = 'regenerate'">Сгенерировать заново</button>
+          <button :disabled="busy || generating" @click="mode = 'regenerate'">Сгенерировать заново</button>
           <button v-if="mode !== 'read'" @click="mode = 'read'">Просмотр</button>
-          <button class="danger" :disabled="busy" @click="removeSection">Удалить раздел</button>
+          <button class="danger" :disabled="busy || generating" @click="removeSection">Удалить раздел</button>
         </div>
 
         <SectionEditor
@@ -248,6 +279,18 @@ const letter = (i) => String.fromCharCode(1040 + i) // А, Б, В…
         </div>
 
         <template v-else>
+          <p v-if="section.status === 'GENERATING'" class="hint">Раздел пишется, текст появится здесь автоматически.</p>
+          <div v-else-if="section.status === 'FAILED'" class="alert error">
+            Раздел не удалось сгенерировать. Нажмите «Сгенерировать заново» (причину смотрите в журнале документа и в сообщении курса)
+            или напишите текст вручную через «Редактировать».
+          </div>
+          <div v-if="section.check && section.check.unsupported && section.check.unsupported.length" class="alert warn">
+            <strong>Проверьте раздел.</strong> Этих чисел и терминов нет в исходных фрагментах, возможно, модель их добавила от себя:
+            {{ section.check.unsupported.join(', ') }}.
+          </div>
+          <div v-if="section.check && section.check.unknown_chunk_ids && section.check.unknown_chunk_ids.length" class="alert warn">
+            Модель сослалась на фрагменты, которых не было среди переданных: {{ section.check.unknown_chunk_ids.join(', ') }}.
+          </div>
           <p v-if="section.content.intro" class="intro">{{ section.content.intro }}</p>
           <p v-if="!section.content.content_md" class="hint">В разделе пока нет текста. Нажмите «Редактировать».</p>
           <div class="md" v-html="html"></div>

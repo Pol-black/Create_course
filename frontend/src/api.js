@@ -82,3 +82,7 @@ export const restoreVersion = async (sectionId, versionId) =>
   handle(await fetch(`${BASE}/sections/${sectionId}/versions/${versionId}/restore`, { method: 'POST' }))
 export const regenerateSection = async (id, hint) =>
   handle(await fetch(`${BASE}/sections/${id}/regenerate`, json('POST', { hint })))
+
+export const generateCourse = async (documentId, replace = false) =>
+  handle(await fetch(`${BASE}/documents/${documentId}/course/generate?replace=${replace}`, { method: 'POST' }))
+export const getLlmModels = async () => handle(await fetch(`${BASE}/llm/models`))

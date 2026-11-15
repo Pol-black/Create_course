@@ -27,16 +27,23 @@ class Settings(BaseSettings):
     chunk_max_words: int = 1000
     chunk_min_words: int = 120
 
-    llm_base_url: str = "https://openrouter.ai/api/v1"
+    llm_base_url: str = "https://api.groq.com/openai/v1"
     llm_api_key: str = ""
-    llm_model: str = "thinkingmachines/inkling:free"
-    llm_fallback_model: str = ""
+    llm_model: str = "openai/gpt-oss-20b"
+    llm_fallback_model: str = ""  
 
-    llm_temperature: float = 0.3 
+    llm_temperature: float = 0.3  
     llm_max_tokens: int = 8192 
-    llm_timeout_s: float = 300  
-    llm_json_attempts: int = 2
-    llm_json_mode: bool = False  
+    llm_timeout_s: float = 120  
+    llm_json_attempts: int = 2  
+    llm_json_mode: bool = True  
+    llm_reasoning_effort: str = "" 
+
+    # Лимиты бесплатного тарифа
+    llm_min_interval_s: float = 2.0
+    llm_rate_limit_retries: int = 3
+    llm_rate_limit_max_wait_s: float = 60
+    llm_max_input_chars: int = 12000  
 
     @property
     def max_upload_bytes(self) -> int:

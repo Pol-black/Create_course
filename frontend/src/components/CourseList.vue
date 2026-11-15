@@ -57,7 +57,11 @@ const when = (iso) => new Date(iso).toLocaleString('ru-RU')
       </thead>
       <tbody>
         <tr v-for="c in courses" :key="c.id">
-          <td><a href="#" @click.prevent="emit('open', c.id)">{{ c.title }}</a></td>
+          <td>
+            <a href="#" @click.prevent="emit('open', c.id)">{{ c.title }}</a>
+            <span v-if="c.status === 'GENERATING'" class="status PROCESSING">создаётся…</span>
+            <span v-else-if="c.status === 'FAILED'" class="status FAILED">ошибка</span>
+          </td>
           <td>{{ c.document_name }}</td>
           <td>{{ c.sections_count }}</td>
           <td>{{ when(c.updated_at) }}</td>

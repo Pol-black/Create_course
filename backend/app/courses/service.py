@@ -59,6 +59,8 @@ def section_view(section: Section, version: SectionVersion | None, versions_coun
         "version_no": version.version_no if version else None,
         "author": version.author.value if version else None,
         "versions_count": versions_count,
+        "check": version.check_result if version else None,
+        "model": version.model if version else None,
         "updated_at": section.updated_at.isoformat(),
         "content": version.content if version else C.empty_content(section.title),
     }
