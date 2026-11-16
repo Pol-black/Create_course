@@ -29,8 +29,8 @@ from app.models import (
 
 logger = logging.getLogger("app.generation")
 
-PLACEHOLDER = "outline"  # prompt_name «пустой» версии: раздел есть в плане, текста ещё нет
-FATAL_CODES = {"llm_no_api_key", "llm_auth", "llm_rate_limit_daily"}  # дальше пробовать бессмысленно
+PLACEHOLDER = "outline" 
+FATAL_CODES = {"llm_no_api_key", "llm_auth", "llm_rate_limit_daily"}  
 INTERRUPTED_MESSAGE = "Генерация была прервана перезапуском сервера. Создайте курс заново или сгенерируйте разделы по одному"
 
 
@@ -152,7 +152,7 @@ def make_outline(llm: LLMService, chunks: list[planning.SourceChunk]) -> CourseO
         chunks=planning.outline_overview(chunks, settings.llm_max_input_chars),
     ).data
     try:
-        return planning.clean_outline(outline, {c.id for c in chunks})  # type: ignore[arg-type]
+        return planning.clean_outline(outline, {c.id for c in chunks}) 
     except ValueError as exc:
         raise LLMError(f"Модель составила неверный план курса: {exc}. Повторите создание курса",
                        code="llm_bad_outline") from exc
@@ -262,7 +262,7 @@ def recover_interrupted_courses() -> int:
 # повторная генерация раздела
 
 def source_chunks(session: Session, section: Section) -> list[planning.SourceChunk]:
-    """Фрагменты раздела: те, на которые он ссылается; если ссылок нет — весь документ."""
+    """Фрагменты раздела: те, на которые он ссылается; если ссылок нет - весь документ."""
     course = session.get(Course, section.course_id)
     ids = service.current_content(session, section).get("source_chunk_ids") or []
     chunks = load_sources(session, course.document_id)
@@ -274,10 +274,11 @@ def regenerate_section(session: Session, section_id: int, hint: str = "", llm: L
     section = service.get_section(session, section_id)
     course = session.get(Course, section.course_id)
     document = session.get(Document, course.document_id)
+    llm = llm or get_llm_service()
     chunks = source_chunks(session, section)
     if not chunks:
         raise AppError("У документа нет фрагментов: сначала нажмите «Обработать»", 409, "no_chunks")
-    write_section(session, section, course, document, chunks, llm or get_llm_service(), hint.strip())
+    write_section(session, section, course, document, chunks, llm, hint.strip())
     if course.status == CourseStatus.FAILED and section.status != SectionStatus.FAILED:
         course.status = CourseStatus.READY  # курс снова пригоден: хотя бы раздел получился
         course.error_message = None

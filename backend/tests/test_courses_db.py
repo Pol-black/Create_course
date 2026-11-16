@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import text
 
 from app.db import SessionLocal
-from app.models import Document, Course, SectionVersion
+from app.models import Document, Course, Section, SectionVersion
 from app.courses import service
 
 
@@ -52,16 +52,14 @@ def course(client):
         s.add(c)
         s.commit()
 
-        # 3. Добавляем 3 раздела (нужно для тестов перетаскивания и версий)
         s1 = service.add_section(s, c.id, "Раздел 1")
-        s1.status = "READY"
-        s2 = service.add_section(s, c.id, "Раздел 2")
-        s2.status = "READY"
-        s3 = service.add_section(s, c.id, "Раздел 3")
-        s3.status = "READY"
-        s.commit()
+        s.expire_all()  
+        service.add_section(s, c.id, "Раздел 2")
+        s.expire_all()  
+        service.add_section(s, c.id, "Раздел 3")
 
-        # 4. Добавляем текст в самую первую версию первого раздела, не увеличивая номер версии
+        s.expire_all()
+        s1 = s.get(Section, s1.id)
         v1 = s.query(SectionVersion).filter(SectionVersion.id == s1.current_version_id).first()
         if v1:
             content = v1.content.copy()

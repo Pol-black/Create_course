@@ -35,7 +35,7 @@ def format_chunks(chunks: list[SourceChunk], max_chars: int) -> tuple[str, list[
     for c in chunks:
         header = f"[Фрагмент {c.id}{pages_label(c)}]\n"
         room = left - len(header)
-        if room < 200 and parts:  # осталось слишком мало места: следующий фрагмент не берём
+        if room < 200 and parts: 
             break
         text = c.text
         if len(text) > room:
@@ -49,8 +49,7 @@ def format_chunks(chunks: list[SourceChunk], max_chars: int) -> tuple[str, list[
 
 
 def outline_overview(chunks: list[SourceChunk], max_chars: int) -> str:
-    """Обзор документа для плана курса: «[номер] заголовок: начало текста».
-    Длина начала подбирается так, чтобы весь обзор уместился в max_chars."""
+    """Обзор документа для плана курса: «[номер] заголовок: начало текста»."""
     if not chunks:
         return ""
     heads = [f"[{c.id}] {(c.heading or 'без заголовка').strip()}: " for c in chunks]

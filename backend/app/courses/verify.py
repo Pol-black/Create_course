@@ -39,9 +39,9 @@ def find_unsupported(content: dict[str, Any], source_text: str) -> list[str]:
             missing.append(item)
 
     for text in _texts(content):
-        text = LIST_MARK.sub("", text)  # номера пунктов списка и заголовки числами не считаем
+        text = LIST_MARK.sub("", text)  
         for n in NUMBER.findall(text):
-            if len(n) >= 2 and _norm_number(n) not in source_numbers:  # одиночные цифры слишком шумные
+            if len(n) >= 2 and _norm_number(n) not in source_numbers:  
                 add(n)
         for word in LATIN.findall(text):
             if word.lower() not in source_lower:

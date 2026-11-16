@@ -92,8 +92,8 @@ pre.text-preview {
   font-size: 13px;
   margin: 0;
 }
-td.actions { white-space: nowrap; }
-td.actions button { margin-right: 4px; }
+td.actions { white-space: normal; min-width: 280px; }
+td.actions button { margin: 0 4px 4px 0; white-space: nowrap; }
 .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
 .tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .chunk { margin-bottom: 14px; }

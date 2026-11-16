@@ -13,8 +13,6 @@ Backend: FastAPI + PostgreSQL (миграции Flyway), frontend: Vue 3, зап
 ## Запуск
 
 ```bash
-git clone <url> && cd Prototype
-cp .env.example .env        # при необходимости поменять пароль, порты, LOG_LEVEL, FRONTEND_PORT
 git clone https://github.com/Pol-black/Create_course.git && cd Create_course
 cp .env.example .env        # поменять пароль БД и вписать ключ OpenRouter в LLM_API_KEY
 docker compose up -d --build
