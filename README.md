@@ -41,6 +41,15 @@ docker compose up -d --build frontend
 | http://localhost:8000/api/llm/check | Связь с моделью: короткий вопрос и ответ |
 | http://localhost:8000/docs | Swagger UI |
 
+Скрипты проверки моделей, журнала обработки и загрузки файлов:
+
+```bash
+docker compose exec backend python -m tests.scripts.check_models
+docker compose exec backend python -m tests.scripts.check_logging
+docker compose exec backend python -m tests.scripts.check_upload
+
+```
+
 Логи: `docker compose logs -f backend` (или `frontend`)
 
 ## Обработка документа
